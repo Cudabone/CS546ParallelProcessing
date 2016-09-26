@@ -42,9 +42,7 @@ void gauss();  /* The function you will provide.
 void gaussPt();
 
 /* Store output prototype to save output to file*/
-void store_output(void);
-
-void store_output();
+void store_output(char *);
 
 /* returns a seed for srand based on the time */
 unsigned int time_seed() {
@@ -63,7 +61,7 @@ void parameters(int argc, char **argv) {
 	/* Read command-line arguments */
 	srand(time_seed());  /* Randomize */
 
-	if (argc == 3) {
+	if (argc >= 3) {
 		seed = atoi(argv[2]);
 		srand(seed);
 		printf("Random seed = %i\n", seed);
@@ -207,18 +205,21 @@ int main(int argc, char **argv) {
 
 	print_inputs();
 	/* Store X output to file */
-	store_output();
+	if(argc == 4)	
+		store_output(argv[3]);
+	else
+		printf("Usage: %s <matrix_dimension> [random seed] <filename>, for an output file\n",argv[0]);
 	
 	exit(0);
 }
-void store_output(void)
+void store_output(char *filename)
 {
 	int row;
-	FILE *fp = fopen("XOUTPt.txt","w");
+	FILE *fp = fopen(filename,"w");
 	for(row = 0; row < N; row++)
 	{
 		if(fprintf(fp,"%.2f\n",X[row])< 0)
-			perror("XOUTMPI Write");
+			perror("Output file Write error");
 		/*if(fwrite(&X[row],sizeof(float),1,fp)< 0);
 		if(fwrite())
 		*/
