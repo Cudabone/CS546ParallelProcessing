@@ -1,3 +1,5 @@
+Gaussian elimination w/o pivoting
+
 Sequential implementation: gauss.c
 To compile: "make seq" 
 To run: ./gauss <Matrix size> <Random Seed>
