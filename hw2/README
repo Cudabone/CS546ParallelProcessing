@@ -1,0 +1,13 @@
+Sequential implementation: gauss.c
+To compile: "make seq" 
+To run: ./gauss <Matrix size> <Random Seed>
+
+MPI implementation: gaussMPI.c
+To compile: "make MPI" 
+To run: mpiexec -n ./gaussMPI <Matrix Size> <Random Seed>
+Output file: XOUTMPI.txt
+
+Pthreads implementation: gaussPt.c
+To compile: "make Pt" 
+To run: ./Pthreads <Matrix Size> <Random Seed>
+Output file: XOUTPt.txt
