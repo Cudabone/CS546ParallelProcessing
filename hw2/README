@@ -7,11 +7,12 @@ To run: ./gauss <Matrix size> <Random Seed>
 MPI implementation: gaussMPI.c
 To compile: "make MPI" 
 To run: mpiexec -n <N> ./gaussMPI <Matrix Size> <Random Seed>
-where N is the number of processes to spawn.
+here N is the number of processes to spawn.
+** OPTIMIZED @ N = # of cores on node; On Jarvis N = 8 **
 With output file: ./gaussMPI <Matrix Size> <Random Seed> <filename>
 
 Pthreads implementation: gaussPt.c
 To compile: "make Pt" 
 To run: ./Pthreads <Matrix Size> <Random Seed>
+** OPTIMIZED @ global var nthreads = # of cores on node; On Jarvis nthreads = 8 **
 With output file: ./Pthreads <Matrix Size> <Random Seed> <filename>
-The Pthreads implementation spawns 4 threads.

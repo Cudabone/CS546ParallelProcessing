@@ -36,7 +36,7 @@ void gauss();  /* The function you will provide.
 		* It is called only on the parent.
 		*/
 /* Store output prototype to save output to file*/
-void store_output(char *);
+void store_output(char *,double);
 
 /* returns a seed for srand based on the time */
 unsigned int time_seed() {
@@ -153,6 +153,8 @@ int main(int argc, char **argv) {
 	}
 	int row,col;
 	/* Send initialized inputs to all processes: A,B,and X */
+	/* This is sent from process 0 so that random values are assigned in the 
+ 	 * vectors and may require synchronization by sending the input matrices */
 	for(row = 0; row < N; row++)
 	{
 		if(rank == 0)
@@ -164,6 +166,7 @@ int main(int argc, char **argv) {
 	}
 	MPI_Bcast(&B[0],N,MPI_FLOAT,0,MPI_COMM_WORLD);
 	if(rank !=0){
+	/*Initialize all process X matrices to 0s */
 	for(col = 0; col < N; col++)
 		X[col] = 0.0;
 	}
@@ -219,18 +222,20 @@ int main(int argc, char **argv) {
 	printf("--------------------------------------------\n");
 	}
 	*/
+	/*Stop timer, print X, and write to output file */
 	if(rank == 0)
 	{
 		//Stop MPI Clock
 		end = MPI_Wtime();
+		double time = (end-start)*1000;
 		printf("Stopping clock\n");
 		//Print output
 		print_X();
-		printf("Parallel execution time: %.3f ms\n",(end-start)*1000);
+		printf("Parallel execution time: %.3f ms\n",time);
 		print_inputs();
 		//Store output in file
 		if(argc == 4)	
-			store_output(argv[3]);
+			store_output(argv[3],time);
 		else
 			printf("Usage: %s <matrix_dimension> [random seed] <filename>, for an output file\n",argv[0]);
 	}
@@ -239,10 +244,16 @@ int main(int argc, char **argv) {
 	
 	exit(0);
 }
-void store_output(char *filename)
+/*Store output including time elapsed and output vector X*/
+void store_output(char *filename, double time)
 {
 	int row;
 	FILE *fp = fopen(filename,"w");
+	/*Store time in file*/
+	if(fprintf(fp,"Elapsed time: %.3f ms\n",time)< 0)
+		perror("Output file Write error");
+	
+	/*Store each X value in file*/
 	for(row = 0; row < N; row++)
 	{
 		if(fprintf(fp,"%.2f\n",X[row])< 0)
@@ -254,7 +265,6 @@ void store_output(char *filename)
 	fclose(fp);
 }
 
-/* ------------------ Above Was Provided --------------------- */
 
 /****** You will replace this routine with your own parallel version *******/
 /* Provided global variables are MAXN, N, A[][], B[], and X[],

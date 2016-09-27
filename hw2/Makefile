@@ -10,4 +10,4 @@ Pt:
 	gcc $(CFLAGS) -pthread gaussPt.c -o gaussPt
 
 clean:
-	rm ./gaussMPI ./gaussPt ./gauss *.txt
+	rm ./gaussMPI ./gaussPt ./gauss 

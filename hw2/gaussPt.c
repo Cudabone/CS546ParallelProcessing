@@ -22,7 +22,7 @@
 #define MAXTHREADS 100 /* max number of threads */
 int N;	/* Matrix size */
 /* Number of Pthreads to run */
-int nprocs = 4;
+int nprocs = 8;
 /* Pthread Barrier */
 pthread_barrier_t *barrier;
 
@@ -42,7 +42,7 @@ void gauss();  /* The function you will provide.
 void gaussPt();
 
 /* Store output prototype to save output to file*/
-void store_output(char *);
+void store_output(char *,double);
 
 /* returns a seed for srand based on the time */
 unsigned int time_seed() {
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 	gettimeofday(&etstart, &tzdummy);
 	etstart2 = times(&cputstart);
 
-	printf("Computing in parallel with %d threads",nprocs);
+	printf("Computing in parallel with %d threads.\n",nprocs);
 
 	/* Gaussian Elimination */
 	gaussPt();
@@ -206,16 +206,22 @@ int main(int argc, char **argv) {
 	print_inputs();
 	/* Store X output to file */
 	if(argc == 4)	
-		store_output(argv[3]);
+		store_output(argv[3],(double)((usecstop-usecstart)/(float)1000));
 	else
 		printf("Usage: %s <matrix_dimension> [random seed] <filename>, for an output file\n",argv[0]);
 	
 	exit(0);
 }
-void store_output(char *filename)
+/*Store output including time elapsed and output vector X*/
+void store_output(char *filename, double time)
 {
 	int row;
 	FILE *fp = fopen(filename,"w");
+	/*Store time in file*/
+	if(fprintf(fp,"Elapsed time: %.3f ms\n",time)< 0)
+		perror("Output file Write error");
+	
+	/*Store each X value in file*/
 	for(row = 0; row < N; row++)
 	{
 		if(fprintf(fp,"%.2f\n",X[row])< 0)
@@ -227,7 +233,6 @@ void store_output(char *filename)
 	fclose(fp);
 }
 
-/* ------------------ Above Was Provided --------------------- */
 
 /****** You will replace this routine with your own parallel version *******/
 /* Provided global variables are MAXN, N, A[][], B[], and X[],
