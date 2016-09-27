@@ -261,16 +261,9 @@ void store_output(char *filename)
  * defined in the beginning of this code.  X[] is initialized to zeros.
  */
 void gauss() {
-	/*if(rank !=0)
-		int temp[N];
-	else if(rank == 0)
-	{
-		int temp
-	}*/
 
 	if(rank ==0)
 		printf("Computing in Parallel.\n");
-
 
 	/* Gaussian elimination */
 	/* For each row iteration, you modify the entire row */
@@ -294,9 +287,9 @@ void gauss() {
 				B[row] -= B[norm] * multiplier;
 			}
 		}
-		/* If normalization is not complete, the row A[norm] will be needed
-		 * the next iteration, so broadcast the row from the process who
-		 * calculated it 
+		/* If normalization is not complete, the row A[norm] and B[norm]
+		 * will be needed the next iteration, so broadcast the row from the process who
+		 * calculated it. 
 		 * The broadcast statement also acts as a barrier before the next 
 		 * iteration of normalization which requires that all processes
 		 * completed their work from the previous iteration to remain correct.*/
@@ -306,26 +299,18 @@ void gauss() {
 			MPI_Bcast(&B[norm+1],1,MPI_FLOAT,(norm+1) % nprocs,MPI_COMM_WORLD);
 		}
 	}
-	/*Before back substitution all of the calculations over B and the last row
-	 * of A need to be sent to a single process, in this case rank 0. Only
-	 * sending the last row of A minimizes communication.*/
-	for(row = 0; row < N; row++)
-	{
-		/*Send each calculated B row to rank 0 from corresponding process who calculated 
-		 * it*/
-		if((row % nprocs == rank) && (rank !=0))
-			MPI_Send(&B[row],1,MPI_FLOAT,0,0,MPI_COMM_WORLD);
-		else if((row % nprocs != 0) && (rank == 0))
-			MPI_Recv(&B[row],1,MPI_FLOAT,(row % nprocs),0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-	}
-	if((N-1) % nprocs == rank)
+	/*Before back substitution the last row of B and the last row
+	 * of A need to be sent to a single process from the process who
+	 * calculated it, in this case to rank 0. Only
+	 * sending the last row of A and B minimizes communication.*/
+	if(((N-1) % nprocs == rank) && (rank != 0))
+		MPI_Send(&B[N-1],1,MPI_FLOAT,0,0,MPI_COMM_WORLD);
+	else if(((N-1) % nprocs != 0) && (rank == 0))
+		MPI_Recv(&B[N-1],1,MPI_FLOAT,((N-1) % nprocs),0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	if(((N-1) % nprocs == rank) && (rank != 0))
 		MPI_Send(A[N-1],N,MPI_FLOAT,0,0,MPI_COMM_WORLD);
-	else if(rank == 0)
+	else if(((N-1) % nprocs != 0) && (rank == 0))
 		MPI_Recv(A[N-1],N,MPI_FLOAT,((N-1) % nprocs),0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-	//MPI_Barrier(MPI_COMM_WORLD); //Ensure all processes done before back substitution
-	/* (Diagonal elements are not normalized to 1.	This is treated in back
-	 * substitution.)
-	 */
 
 	if(rank == 0)
 	{
