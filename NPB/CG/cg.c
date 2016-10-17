@@ -283,23 +283,36 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
     norm_temp1 = 0.0;
     norm_temp2 = 0.0;
+	/*
     #pragma omp parallel for default(shared) private(j) \
                              reduction(+:norm_temp1,norm_temp2)
+							 */
+
+	#pragma omp parallel default(shared) private(j)
+	{
+
+	#pragma omp for reduction(+:norm_temp1,norm_temp2)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       norm_temp1 = norm_temp1 + x[j] * z[j];
       norm_temp2 = norm_temp2 + z[j] * z[j];
     }
 
+	#pragma omp master
+	{
     norm_temp2 = 1.0 / sqrt(norm_temp2);
+	}
+	#pragma omp barrier
 
     //---------------------------------------------------------------------
     // Normalize z to obtain x
     //---------------------------------------------------------------------
-    #pragma omp parallel for default(shared) private(j)
+    //#pragma omp parallel for default(shared) private(j)
+	#pragma omp for 
     for (j = 0; j < lastcol - firstcol + 1; j++) {     
       x[j] = norm_temp2 * z[j];
     }
-  } // end of do one iteration untimed
+	}
+ 	} // end of do one iteration untimed
 
 
   //---------------------------------------------------------------------
@@ -339,27 +352,40 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
     norm_temp1 = 0.0;
     norm_temp2 = 0.0;
-    #pragma omp parallel for default(shared) private(j) \
+    /*#pragma omp parallel for default(shared) private(j) \
                              reduction(+:norm_temp1,norm_temp2)
+							 */
+#pragma omp parallel default(shared) private(j)
+	{
+
+	#pragma omp for reduction(+:norm_temp1,norm_temp2)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       norm_temp1 = norm_temp1 + x[j]*z[j];
       norm_temp2 = norm_temp2 + z[j]*z[j];
     }
 
+	#pragma omp master
+	{
     norm_temp2 = 1.0 / sqrt(norm_temp2);
 
     zeta = SHIFT + 1.0 / norm_temp1;
     if (it == 1) 
       printf("\n   iteration           ||r||                 zeta\n");
     printf("    %5d       %20.14E%20.13f\n", it, rnorm, zeta);
+	}
 
     //---------------------------------------------------------------------
     // Normalize z to obtain x
     //---------------------------------------------------------------------
-    #pragma omp parallel for default(shared) private(j)
+
+    //#pragma omp parallel for default(shared) private(j)
+	#pragma omp barrier
+
+	#pragma omp for nowait 
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       x[j] = norm_temp2 * z[j];
     }
+	}
   } // end of main iter inv pow meth
 
   timer_stop(T_bench);
@@ -505,7 +531,7 @@ static void conj_grad(int colidx[],
     //       The unrolled-by-8 version below is significantly faster
     //       on the Cray t3d - overall speed of code is 1.5 times faster.
 
-    #pragma omp for
+#pragma omp for
     for (j = 0; j < lastrow - firstrow + 1; j++) {
       suml = 0.0;
       for (k = rowstr[j]; k < rowstr[j+1]; k++) {
@@ -514,7 +540,7 @@ static void conj_grad(int colidx[],
       q[j] = suml;
     }
 
-    /*
+	/*
     for (j = 0; j < lastrow - firstrow + 1; j++) {
       int i = rowstr[j];
       int iresidue = (rowstr[j+1] - i) % 2;
@@ -528,9 +554,9 @@ static void conj_grad(int colidx[],
       }
       q[j] = sum1 + sum2;
     }
-    */
+	*/
 
-    /*
+	/*
     for (j = 0; j < lastrow - firstrow + 1; j++) {
       int i = rowstr[j]; 
       int iresidue = (rowstr[j+1] - i) % 8;
@@ -550,7 +576,7 @@ static void conj_grad(int colidx[],
       }
       q[j] = suml;
     }
-    */
+	*/
 
     //---------------------------------------------------------------------
     // Obtain p.q
