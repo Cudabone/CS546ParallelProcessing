@@ -1,0 +1,53 @@
+
+
+ NAS Parallel Benchmarks (NPB3.3-OMP-C) - MG Benchmark
+
+ Reading from input file mg.input
+ Size:  512x 512x 512  (class C)
+ Iterations:                     20
+ Number of available threads:     8
+
+ Initialization time:          16.425 seconds
+
+  iter   1
+  iter   5
+  iter  10
+  iter  15
+  iter  20
+
+ Benchmark completed
+ VERIFICATION SUCCESSFUL
+ L2 Norm is  5.7067322857392E-07
+ Error is    1.3228553162145E-13
+
+
+ MG Benchmark Completed.
+ Class           =                        C
+ Size            =            512x 512x 512
+ Iterations      =                       20
+ Time in seconds =                    37.05
+ Total threads   =                        8
+ Avail threads   =                        8
+ Mop/s total     =                  4201.71
+ Mop/s/thread    =                   525.21
+ Operation type  =           floating point
+ Verification    =               SUCCESSFUL
+ Version         =                    3.3.1
+ Compile date    =              16 Oct 2016
+
+ Compile options:
+    CC           = gcc
+    CLINK        = $(CC)
+    C_LIB        = -lm
+    C_INC        = -I../common
+    CFLAGS       = -g -Wall -O3 -fopenmp -mcmodel=medium
+    CLINKFLAGS   = -O3 -fopenmp -mcmodel=medium
+    RAND         = randdp
+
+--------------------------------------
+ Please send all errors/feedbacks to:
+ Center for Manycore Programming
+ cmp@aces.snu.ac.kr
+ http://aces.snu.ac.kr
+--------------------------------------
+
