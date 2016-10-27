@@ -196,6 +196,7 @@ void matrixNorm() {
 		for (row=0; row < N; row++)
 			sigma += powf(A[row][col] - mu, 2.0);
 		sigma /= (float) N;
+		sigma = sqrt(sigma);
 		for (row=0; row < N; row++) {
 			if (sigma == 0.0)
 				B[row][col] = 0.0;
