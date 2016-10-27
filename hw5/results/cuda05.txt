@@ -1,0 +1,15 @@
+
+Matrix dimension N = 500.
+
+Initializing...
+
+Starting clock.
+Executing on GPU
+Stopped clock.
+
+Elapsed time = 147.929 ms.
+(CPU times are accurate to the nearest 0.001 ms)
+My total CPU time for parent = 0.013 ms.
+My system CPU time for parent = 0.01 ms.
+My total CPU time for child processes = 0 ms.
+--------------------------------------------

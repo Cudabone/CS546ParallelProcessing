@@ -1,0 +1,15 @@
+
+Matrix dimension N = 8000.
+
+Initializing...
+
+Starting clock.
+Computing Serially.
+Stopped clock.
+
+Elapsed time = 5167.23 ms.
+(CPU times are accurate to the nearest 0.001 ms)
+My total CPU time for parent = 0.517 ms.
+My system CPU time for parent = 0.001 ms.
+My total CPU time for child processes = 0 ms.
+--------------------------------------------

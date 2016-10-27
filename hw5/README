@@ -1,0 +1,20 @@
+Homework 5: Matrix Normalization via CUDA
+
+Sequential Implementation
+matrixNorm.c = Sequential implementation of normalization algorithm
+Compilation: 
+	make
+Run:
+	./matrixNorm <Matrix-Size> <Random-Seed>
+
+CUDA Implementation
+matrixNorm.cu = CUDA implementation of the normalization algorithm
+Compilation:
+	make cuda
+Run: 
+	./matrixCuda <Matrix-Size> <Random-Seed>
+
+Results
+The results are in the ./results directory
+with names cuda*.txt and seq*.txt for cuda and
+sequential implementations respectively.
