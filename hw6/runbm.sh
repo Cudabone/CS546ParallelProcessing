@@ -1,2 +1,2 @@
 #!/bin/bash
-mpiexec -npernode 8 ./mpibm
+mpirun -npernode 8 /home/mmikuta/hw6/mpibm 1 /home/mmikuta/hw6/test.txt

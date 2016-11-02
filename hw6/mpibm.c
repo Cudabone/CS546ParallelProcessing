@@ -32,21 +32,21 @@ int main(int argc, char **argv)
 	const size_t MB = 1024*1024;
 
 	//Set filename if given, else exit
-	char *outfile;
+	char *outfile = "/home/mmikuta/orangefs/storage/data/temp.dat";
 	//Number of MB to write and read
 	int numMB;
 	//Output file for timings and bandwidth
 	char *timefile;
 
-	if(argc != 4)
+	if(argc != 3)
 	{
 		if(rank == 0)
-			printf("Usage: mpiexec -n <nprocs> ./rank <filename1> <MB-per-rank> <filename2>\n");
+			printf("Usage: mpiexec -n <nprocs> ./mpibm <MB-per-rank> <filename2>\n");
 		return -1;
 	}
 	else
 	{
-		outfile = argv[1];
+		//outfile = argv[1];
 		numMB = atoi(argv[2])*MB;
 		timefile = argv[3];
 	}
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 	//Start read timer
 	rdstart = MPI_Wtime();
 	//Open file
-	MPI_CHECK(MPI_File_open(MPI_COMM_WORLD,outfile,MPI_MODE_RDONLY|MPI_MODE_DELETE_ON_CLOSE,MPI_INFO_NULL,&file));
+	MPI_CHECK(MPI_File_open(MPI_COMM_WORLD,outfile,MPI_MODE_RDONLY,MPI_INFO_NULL,&file));
 	//Read
 	MPI_CHECK(MPI_File_read_at(file,offset,buf,numMB,MPI_BYTE,NULL));
 	MPI_CHECK(MPI_File_close(&file));
@@ -93,7 +93,8 @@ int main(int argc, char **argv)
 	double ttime = (end-start);
 
 	//Write file
-	store_output(timefile,numMB,wrtime,rdtime,ttime);
+	if(rank == 0)
+		store_output(timefile,numMB,wrtime,rdtime,ttime);
 	
 
 	MPI_Finalize();

@@ -6,3 +6,14 @@ Run:
 	mpiexec -n 4 ./rank <output-file>
 View Output:
 	od -td -v <output-file>
+
+
+Part 2: MPI-IO Benchmark on Jarvis using OrangeFS
+Compile:
+	make mpibm
+Init Servers: 
+	./ofsinit.sh
+Start Servers: 
+	./ofsstart.sh	
+Run:
+	qsub -pe mpich 4 runbm.sh
