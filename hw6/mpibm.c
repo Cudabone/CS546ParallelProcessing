@@ -127,6 +127,3 @@ static void handle_error(int errcode, char *str)
 	 *    * the following line */
 	MPI_Abort(MPI_COMM_WORLD, 1);
 }
-
-#define MPI_CHECK(fn) { int errcode; errcode = (fn); \
-    if (errcode != MPI_SUCCESS) handle_error(errcode, #fn ); }}

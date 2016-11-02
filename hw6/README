@@ -1,0 +1,8 @@
+Homework 6: MPI-IO
+Part 1: Simple I/O program to write rank to common file
+Compile: 
+	make rank
+Run: 
+	mpiexec -n 4 ./rank <output-file>
+View Output:
+	od -td -v <output-file>
