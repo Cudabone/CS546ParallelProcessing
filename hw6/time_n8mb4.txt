@@ -1,0 +1,4 @@
+write time: 2.751 seconds
+read time: 2.398 seconds
+overall time: 5.149 seconds
+maximum bandwidth (per node): 13.35 MB/s

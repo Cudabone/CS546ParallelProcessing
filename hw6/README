@@ -16,4 +16,7 @@ Init Servers:
 Start Servers: 
 	./ofsstart.sh	
 Run:
-	qsub -pe mpich 4 runbm.sh
+	./runnodes.sh <Procs-Per-Node> <MB>	
+Output: ./test.txt
+Stop Servers:
+	killall pvfs2-server

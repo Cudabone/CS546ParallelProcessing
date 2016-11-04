@@ -34,8 +34,7 @@ int main(int argc, char **argv)
 	const size_t MB = 1000000;
 
 	//Set filename if given, else exit
-	//char *outfile = "/home/mmikuta/orangefs/storage/data/temp.dat";
-	char *outfile = "temp";
+	char *outfile = "/home/mmikuta/orangefs/storage/data/temp.dat";
 	//Number of MB to write and read
 	int numMB;
 	int intpermb = MB/(sizeof(int));
@@ -67,11 +66,13 @@ int main(int argc, char **argv)
 	//Create buffer filled with ranks
 	int buf[size];
 	
+	/*
 	int i;
 	for(i = 0; i < size; i++)
 		buf[i] = rank;
+		*/
 	
-	printf("Before write\n");
+	//printf("Before write\n");
 	/* FILE WRITE */
 	//Start write timer
 	wrstart = MPI_Wtime();
@@ -84,7 +85,7 @@ int main(int argc, char **argv)
 	wrend = MPI_Wtime();
 	
 	MPI_Barrier(MPI_COMM_WORLD);
-	printf("After write\n");
+	//printf("After write\n");
 
 	/* FILE READ */
 	//Start read timer
@@ -92,10 +93,10 @@ int main(int argc, char **argv)
 	//Open file
 	MPI_CHECK(MPI_File_open(MPI_COMM_WORLD,outfile,MPI_MODE_RDONLY,MPI_INFO_NULL,&file));
 	//Read
-	printf("File opened\n");
+	//printf("File opened\n");
 	MPI_Status status;
 	MPI_CHECK(MPI_File_read_at(file,offset,buf,size,MPI_INT,&status));
-	printf("File read\n");
+	//printf("File read\n");
 	MPI_CHECK(MPI_File_close(&file));
 	//Stop read timer
 	rdend = MPI_Wtime();
@@ -122,12 +123,12 @@ void store_output(const char *filename, int numMB, double wrtime, double rdtime,
 	/*Store time in file*/
 	fprintf(fp,"write time: %.3f seconds\n",wrtime);
 	fprintf(fp,"read time: %.3f seconds\n",rdtime);
-	fprintf(fp,"overall time: %.3f seconds\n",wrtime);
+	fprintf(fp,"overall time: %.3f seconds\n",ttime);
 	double bwwrite = numMB/wrtime; 
 	double bwread = numMB/rdtime;
 	double maxbw = (bwwrite > bwread) ? bwwrite : bwread;
 	double totalbw = maxbw*nprocs;
-	fprintf(fp,"maximum bandwidth: %.2f MB/s\n",totalbw);
+	fprintf(fp,"maximum bandwidth (per node): %.2f MB/s\n",totalbw);
 	
 	/*Store each X value in file*/
 	fclose(fp);
