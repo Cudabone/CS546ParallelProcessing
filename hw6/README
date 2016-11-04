@@ -22,3 +22,6 @@ Run on one node:
 Output: ./test.txt
 Stop Servers:
 	killall pvfs2-server
+
+Benchmark Results:
+	"test_n<Procs-Per-Node>mb<MB>.txt"
