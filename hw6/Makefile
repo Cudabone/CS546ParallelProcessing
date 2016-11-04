@@ -1,7 +1,7 @@
 CC = mpicc
 CFLAGS = -Wall
-INCLUDES = -I /home/mmikuta/orangefs/include #-I /mpich2_install_dir/include 
-LIBS = -L /home/mmikuta/orangefs/lib #-L /mpich2_install_dir/lib 
+INCLUDES = -I /home/mmikuta/orangefs/include
+LIBS = -L /home/mmikuta/orangefs/lib
 MPIFLAGS = -lpvfs2 
 
 rank: rank.c
