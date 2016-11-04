@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <string.h>
 
 #define MPI_CHECK(fn) { int errcode; errcode = (fn); \
     if (errcode != MPI_SUCCESS) handle_error(errcode, #fn ); }
-
-#define MPI_WTIME_IS_GLOBAL 1
 
 static void handle_error(int errcode, char *str);
 void store_output(const char *filename, int numMB,double wrtime, double rdtime, double ttime);
@@ -31,51 +30,61 @@ int main(int argc, char **argv)
 	start = MPI_Wtime();
 
 	//Define the size of a MegaByte
-	const size_t MB = 1024*1024;
+	//const size_t MB = 1024*1024;
+	const size_t MB = 1000000;
 
 	//Set filename if given, else exit
-	char *outfile = "/home/mmikuta/orangefs/storage/data/temp.dat";
+	//char *outfile = "/home/mmikuta/orangefs/storage/data/temp.dat";
+	char *outfile = "temp";
 	//Number of MB to write and read
 	int numMB;
+	int intpermb = MB/(sizeof(int));
 	//Output file for timings and bandwidth
 	char *timefile;
 
 	if(argc != 3)
 	{
 		if(rank == 0)
-			printf("Usage: mpiexec -n <nprocs> ./mpibm <MB-per-rank> <filename2>\n");
+			printf("Usage: mpiexec -n <nprocs> ./mpibm <MB-per-rank> <filename>\n");
 		return -1;
 	}
 	else
 	{
 		//outfile = argv[1];
-		numMB = atoi(argv[2])*MB;
-		timefile = argv[3];
+		numMB = atoi(argv[1]);
+		timefile = argv[2];
 	}
-
+	
+	//size of int array to read write #MB
+	int size = numMB*intpermb;
+	//printf("size: %d\n",size);
+	//printf("numMB: %d\n",numMB);
+	//printf("intpermb: %d\n",intpermb);
+	//printf("timefile: %s\n",timefile);
 	//Set buffer size and Offset in file per write
-	MPI_Offset offset = rank*numMB;
+	const MPI_Offset offset = rank*size*sizeof(int);
 
 	//Create buffer filled with ranks
-	void *buf = malloc(numMB);
-	/*
+	int buf[size];
+	
 	int i;
-	for(i = 0; i < count; i++)
+	for(i = 0; i < size; i++)
 		buf[i] = rank;
-		*/
-
+	
+	printf("Before write\n");
 	/* FILE WRITE */
 	//Start write timer
 	wrstart = MPI_Wtime();
 	//Open file
 	MPI_CHECK(MPI_File_open(MPI_COMM_WORLD,outfile,MPI_MODE_CREATE|MPI_MODE_WRONLY,MPI_INFO_NULL,&file));
 	//Write rank count times in file starting at offset
-	MPI_CHECK(MPI_File_write_at(file,offset,buf,numMB,MPI_BYTE,NULL));
+	MPI_CHECK(MPI_File_write_at(file,offset,buf,size,MPI_INT,NULL));
 	MPI_CHECK(MPI_File_close(&file));
 	//Stop write timer
 	wrend = MPI_Wtime();
 	
 	MPI_Barrier(MPI_COMM_WORLD);
+	printf("After write\n");
 
 	/* FILE READ */
 	//Start read timer
@@ -83,12 +92,13 @@ int main(int argc, char **argv)
 	//Open file
 	MPI_CHECK(MPI_File_open(MPI_COMM_WORLD,outfile,MPI_MODE_RDONLY,MPI_INFO_NULL,&file));
 	//Read
-	MPI_CHECK(MPI_File_read_at(file,offset,buf,numMB,MPI_BYTE,NULL));
+	printf("File opened\n");
+	MPI_Status status;
+	MPI_CHECK(MPI_File_read_at(file,offset,buf,size,MPI_INT,&status));
+	printf("File read\n");
 	MPI_CHECK(MPI_File_close(&file));
 	//Stop read timer
 	rdend = MPI_Wtime();
-
-	free(buf);
 
 	//Stop benchmark timer
 	end = MPI_Wtime();
@@ -110,14 +120,14 @@ void store_output(const char *filename, int numMB, double wrtime, double rdtime,
 	//We should write from each nodes rank 0
 	FILE *fp = fopen(filename,"w");
 	/*Store time in file*/
-	fprintf(fp,"write time: %.2f seconds\n",wrtime);
-	fprintf(fp,"read time: %.2f seconds\n",rdtime);
-	fprintf(fp,"overall time: %.2f seconds\n",wrtime);
+	fprintf(fp,"write time: %.3f seconds\n",wrtime);
+	fprintf(fp,"read time: %.3f seconds\n",rdtime);
+	fprintf(fp,"overall time: %.3f seconds\n",wrtime);
 	double bwwrite = numMB/wrtime; 
 	double bwread = numMB/rdtime;
 	double maxbw = (bwwrite > bwread) ? bwwrite : bwread;
 	double totalbw = maxbw*nprocs;
-	fprintf(fp,"maximum bandwidth: %.2f MB/s\n",maxbw);
+	fprintf(fp,"maximum bandwidth: %.2f MB/s\n",totalbw);
 	
 	/*Store each X value in file*/
 	fclose(fp);
