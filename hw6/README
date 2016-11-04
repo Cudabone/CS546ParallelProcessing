@@ -15,8 +15,10 @@ Init Servers:
 	./ofsinit.sh
 Start Servers: 
 	./ofsstart.sh	
-Run:
+Run on Cluster:
 	./runnodes.sh <Procs-Per-Node> <MB>	
+Run on one node:
+	mpiexec -n <Number-of-Procs> ./mpibm <MB> <output-file>
 Output: ./test.txt
 Stop Servers:
 	killall pvfs2-server
