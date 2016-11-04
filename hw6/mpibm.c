@@ -5,6 +5,8 @@
 #define MPI_CHECK(fn) { int errcode; errcode = (fn); \
     if (errcode != MPI_SUCCESS) handle_error(errcode, #fn ); }
 
+#define MPI_WTIME_IS_GLOBAL 1
+
 static void handle_error(int errcode, char *str);
 void store_output(const char *filename, int numMB,double wrtime, double rdtime, double ttime);
 
@@ -72,6 +74,8 @@ int main(int argc, char **argv)
 	MPI_CHECK(MPI_File_close(&file));
 	//Stop write timer
 	wrend = MPI_Wtime();
+	
+	MPI_Barrier(MPI_COMM_WORLD);
 
 	/* FILE READ */
 	//Start read timer
@@ -103,6 +107,7 @@ int main(int argc, char **argv)
 //Store output timings
 void store_output(const char *filename, int numMB, double wrtime, double rdtime, double ttime)
 {
+	//We should write from each nodes rank 0
 	FILE *fp = fopen(filename,"w");
 	/*Store time in file*/
 	fprintf(fp,"write time: %.2f seconds\n",wrtime);
@@ -111,6 +116,7 @@ void store_output(const char *filename, int numMB, double wrtime, double rdtime,
 	double bwwrite = numMB/wrtime; 
 	double bwread = numMB/rdtime;
 	double maxbw = (bwwrite > bwread) ? bwwrite : bwread;
+	double totalbw = maxbw*nprocs;
 	fprintf(fp,"maximum bandwidth: %.2f MB/s\n",maxbw);
 	
 	/*Store each X value in file*/
