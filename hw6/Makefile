@@ -16,4 +16,4 @@ mpibm: mpibm.c
 .PHONY: clean
 
 clean:
-	@rm -f rank *.dat mpibm
+	@rm -f rank .runbm.sh.* mpibm *.log
