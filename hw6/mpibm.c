@@ -30,17 +30,18 @@ int main(int argc, char **argv)
 	start = MPI_Wtime();
 
 	//Define the size of a MegaByte
-	//const size_t MB = 1024*1024;
 	const size_t MB = 1000000;
 
 	//Set filename if given, else exit
 	char *outfile = "/home/mmikuta/orangefs/storage/data/temp.dat";
 	//Number of MB to write and read
 	int numMB;
+	//Find the number of ints to a megabyte
 	int intpermb = MB/(sizeof(int));
 	//Output file for timings and bandwidth
 	char *timefile;
 
+	//Get arguments 
 	if(argc != 3)
 	{
 		if(rank == 0)
@@ -54,25 +55,14 @@ int main(int argc, char **argv)
 		timefile = argv[2];
 	}
 	
-	//size of int array to read write #MB
+	//size of int array to read/write #MB
 	int size = numMB*intpermb;
-	//printf("size: %d\n",size);
-	//printf("numMB: %d\n",numMB);
-	//printf("intpermb: %d\n",intpermb);
-	//printf("timefile: %s\n",timefile);
-	//Set buffer size and Offset in file per write
+	//Offset for each process to write
 	const MPI_Offset offset = rank*size*sizeof(int);
 
-	//Create buffer filled with ranks
+	//Default initialized integer buffer to write to / read from file into
 	int buf[size];
 	
-	/*
-	int i;
-	for(i = 0; i < size; i++)
-		buf[i] = rank;
-		*/
-	
-	//printf("Before write\n");
 	/* FILE WRITE */
 	//Start write timer
 	wrstart = MPI_Wtime();
@@ -84,8 +74,8 @@ int main(int argc, char **argv)
 	//Stop write timer
 	wrend = MPI_Wtime();
 	
+	//Ensure that write is done
 	MPI_Barrier(MPI_COMM_WORLD);
-	//printf("After write\n");
 
 	/* FILE READ */
 	//Start read timer
@@ -93,7 +83,6 @@ int main(int argc, char **argv)
 	//Open file
 	MPI_CHECK(MPI_File_open(MPI_COMM_WORLD,outfile,MPI_MODE_RDONLY,MPI_INFO_NULL,&file));
 	//Read
-	//printf("File opened\n");
 	MPI_Status status;
 	MPI_CHECK(MPI_File_read_at(file,offset,buf,size,MPI_INT,&status));
 	//printf("File read\n");
@@ -107,7 +96,7 @@ int main(int argc, char **argv)
 	double rdtime = (rdend-rdstart);
 	double ttime = (end-start);
 
-	//Write file
+	//Write to output file
 	if(rank == 0)
 		store_output(timefile,numMB,wrtime,rdtime,ttime);
 	
@@ -126,6 +115,7 @@ void store_output(const char *filename, int numMB, double wrtime, double rdtime,
 	fprintf(fp,"overall time: %.3f seconds\n",ttime);
 	double bwwrite = numMB/wrtime; 
 	double bwread = numMB/rdtime;
+	//The larger of read BW or write BW
 	double maxbw = (bwwrite > bwread) ? bwwrite : bwread;
 	double totalbw = maxbw*nprocs;
 	fprintf(fp,"maximum bandwidth (per node): %.2f MB/s\n",totalbw);
@@ -133,6 +123,7 @@ void store_output(const char *filename, int numMB, double wrtime, double rdtime,
 	/*Store each X value in file*/
 	fclose(fp);
 }
+//Given error handling code
 static void handle_error(int errcode, char *str)
 {
 	char msg[MPI_MAX_ERROR_STRING];
